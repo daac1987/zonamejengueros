@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  usuario_id          Int                   @id @default(autoincrement())
+  nombre_usuario      String                @db.VarChar(50)
+  email_usuario       String                @unique(map: "email_usuario") @db.VarChar(50)
+  contrasena_usuario  String                @db.VarChar(255)
+  fecha_usuario       DateTime              @default(now()) @db.Timestamp(0)
+  email_verificado    Boolean               @default(false)
+  ultima_sesion       DateTime?             @db.DateTime(0)
+  publicacion_noticia publicacion_noticia[]
+  usuario_cancha      usuario_cancha[]
+  usuario_equipo      usuario_equipo[]
+  usuario_torneo      usuario_torneo[]
+
+  @@map("usuario")
+}
+
+model cancha {
+  cancha_id             Int                 @id @default(autoincrement())
+  nombre_cancha         String              @db.VarChar(50)
+  telefono_cancha       String?             @db.VarChar(20)
+  provincia_cancha      String?             @db.VarChar(20)
+  ubicacion_cancha      String?             @db.VarChar(100)
+  encargado_cancha      String?             @db.VarChar(50)
+  horario_cancha        String?             @db.VarChar(50)
+  grama_cancha          String?             @db.VarChar(50)
+  cantidad_jugadores_id Int?
+  precio_cancha         Int
+  servicios_cancha      String?             @db.VarChar(200)
+  sede_url              String?             @db.VarChar(250)
+  foto_sede_uno_url     String?             @db.VarChar(250)
+  foto_sede_dos_url     String?             @db.VarChar(250)
+  fecha_cancha          DateTime            @default(now()) @db.Timestamp(0)
+  cantidad_jugadores    cantidad_jugadores? @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_cancha_cantidad_jugadores")
+  sede_equipo           sede_equipo[]
+  sede_torneo           sede_torneo[]
+  usuario_cancha        usuario_cancha[]
+
+  @@index([cantidad_jugadores_id], map: "fk_cancha_cantidad_jugadores")
+}
+
+model equipo {
+  equipo_id             Int                    @id @default(autoincrement())
+  nombre_equipo         String                 @db.VarChar(50)
+  telefono_equipo       String?                @db.VarChar(20)
+  provincia_equipo      String?                @db.VarChar(20)
+  ubicacion_equipo      String?                @db.VarChar(100)
+  encargado_equipo      String?                @db.VarChar(50)
+  logros_equipo         String                 @db.VarChar(200)
+  categoria_equipo_id   Int?
+  cantidad_jugadores_id Int?
+  logo_url              String?                @db.VarChar(250)
+  foto_equipo_uno_url   String?                @db.VarChar(250)
+  foto_equipo_dos_url   String?                @db.VarChar(250)
+  fecha_equipo          DateTime               @default(now()) @db.Timestamp(0)
+  categoria_equipo      categoria_equipo?      @relation(fields: [categoria_equipo_id], references: [categoria_equipo_id], onDelete: Restrict, onUpdate: Restrict, map: "equipo_ibfk_1")
+  cantidad_jugadores    cantidad_jugadores?    @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_equipo_cantidad_jugadores")
+  inscripciones_torneo  inscripciones_torneo[]
+  sede_equipo           sede_equipo[]
+  usuario_equipo        usuario_equipo[]
+
+  @@index([categoria_equipo_id], map: "categoria_equipo_id")
+  @@index([cantidad_jugadores_id], map: "fk_equipo_cantidad_jugadores")
+}
+
+model goleador {
+  jugador_id           Int                  @id @default(autoincrement())
+  nombre_jugador       String               @db.VarChar(100)
+  goles_jugador        Int
+  inscripcionTorneo_id Int
+  inscripciones_torneo inscripciones_torneo @relation(fields: [inscripcionTorneo_id], references: [inscripcionTorneo_id], onUpdate: Restrict, map: "goleador_ibfk_1")
+
+  @@index([inscripcionTorneo_id], map: "inscripcionTorneo_id")
+}
+
+model inscripciones_torneo {
+  inscripcionTorneo_id Int                @id @default(autoincrement())
+  fecha_inscripcion    DateTime           @default(now()) @db.Timestamp(0)
+  equipo_id            Int
+  torneo_id            Int
+  goleador             goleador[]
+  equipo               equipo             @relation(fields: [equipo_id], references: [equipo_id], onUpdate: Restrict, map: "inscripciones_torneo_ibfk_1")
+  torneo               torneo             @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "inscripciones_torneo_ibfk_2")
+  tabla_posiciones     tabla_posiciones[]
+
+  @@index([equipo_id], map: "equipo_id")
+  @@index([torneo_id], map: "torneo_id")
+}
+
+model noticia {
+  noticia_id           Int                   @id @default(autoincrement())
+  categoria_noticia_id Int?
+  titulo_noticia       String                @db.VarChar(50)
+  texto_noticia        String                @db.VarChar(200)
+  foto_noticia_url     String?               @db.VarChar(250)
+  categoria_noticia    categoria_noticia?    @relation(fields: [categoria_noticia_id], references: [categoria_noticia_id], onDelete: Restrict, onUpdate: Restrict, map: "noticia_ibfk_1")
+  publicacion_noticia  publicacion_noticia[]
+
+  @@index([categoria_noticia_id], map: "categoria_noticia_id")
+}
+
+model publicacion_noticia {
+  publicacionNoticia_id Int      @id @default(autoincrement())
+  noticia_id            Int
+  usuario_id            Int
+  fecha_noticia         DateTime @default(now()) @db.Timestamp(0)
+  noticia               noticia  @relation(fields: [noticia_id], references: [noticia_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_1")
+  usuario               Usuario  @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_2")
+
+  @@index([noticia_id], map: "noticia_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model sede_equipo {
+  sedeEquipo_id Int    @id @default(autoincrement())
+  equipo_id     Int
+  cancha_id     Int
+  equipo        equipo @relation(fields: [equipo_id], references: [equipo_id], onUpdate: Restrict, map: "sede_equipo_ibfk_1")
+  cancha        cancha @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "sede_equipo_ibfk_2")
+
+  @@index([cancha_id], map: "cancha_id")
+  @@index([equipo_id], map: "equipo_id")
+}
+
+model sede_torneo {
+  sedeTorneo_id Int    @id @default(autoincrement())
+  torneo_id     Int
+  cancha_id     Int
+  torneo        torneo @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "sede_torneo_ibfk_1")
+  cancha        cancha @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "sede_torneo_ibfk_2")
+
+  @@index([cancha_id], map: "cancha_id")
+  @@index([torneo_id], map: "torneo_id")
+}
+
+model tabla_posiciones {
+  posicion_id          Int                  @id @default(autoincrement())
+  puntos_ganados       Int
+  partidos_jugados     Int
+  diferencia_gol       Int
+  inscripcionTorneo_id Int
+  inscripciones_torneo inscripciones_torneo @relation(fields: [inscripcionTorneo_id], references: [inscripcionTorneo_id], onUpdate: Restrict, map: "tabla_posiciones_ibfk_1")
+
+  @@index([inscripcionTorneo_id], map: "inscripcionTorneo_id")
+}
+
+model torneo {
+  torneo_id                 Int                    @id @default(autoincrement())
+  nombre_torneo             String                 @db.VarChar(50)
+  telefono_torneo           String?                @db.VarChar(20)
+  provincia_torneo          String?                @db.VarChar(20)
+  ubicacion_torneo          String?                @db.VarChar(100)
+  encargado_torneo          String?                @db.VarChar(50)
+  cantidad_equipos_torneo   Int?
+  cantidad_jugadores_id     Int?
+  categoria_equipo_id       Int?
+  especificaciones_torneo   String?                @db.VarChar(200)
+  precio_inscripcion_torneo Int
+  premioUno_torneo          String?                @db.VarChar(100)
+  premioDos_torneo          String?                @db.VarChar(100)
+  premioTres_torneo         String?                @db.VarChar(100)
+  logo_url                  String?                @db.VarChar(250)
+  fecha_torneo              DateTime               @default(now()) @db.Timestamp(0)
+  estado_torneo             String                 @db.VarChar(50)
+  fecha_inicio              DateTime               @db.Date
+  inscripciones_torneo      inscripciones_torneo[]
+  sede_torneo               sede_torneo[]
+  cantidad_jugadores        cantidad_jugadores?    @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_torneo_cantidad_jugadores")
+  categoria_equipo          categoria_equipo?      @relation(fields: [categoria_equipo_id], references: [categoria_equipo_id], onDelete: Restrict, onUpdate: Restrict, map: "torneo_ibfk_1")
+  usuario_torneo            usuario_torneo[]
+
+  @@index([categoria_equipo_id], map: "categoria_equipo_id")
+  @@index([cantidad_jugadores_id], map: "fk_torneo_cantidad_jugadores")
+}
+
+model usuario_cancha {
+  usuarioCancha_id Int     @id @default(autoincrement())
+  usuario_id       Int
+  cancha_id        Int
+  usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_cancha_ibfk_1")
+  cancha           cancha  @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "usuario_cancha_ibfk_2")
+
+  @@index([cancha_id], map: "cancha_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model usuario_equipo {
+  usuarioEquipo_id Int     @id @default(autoincrement())
+  usuario_id       Int
+  equipo_id        Int
+  usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_equipo_ibfk_1")
+  equipo           equipo  @relation(fields: [equipo_id], references: [equipo_id], onUpdate: Restrict, map: "usuario_equipo_ibfk_2")
+
+  @@index([equipo_id], map: "equipo_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model usuario_torneo {
+  usuarioTorneo_id Int     @id @default(autoincrement())
+  usuario_id       Int
+  torneo_id        Int
+  usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_torneo_ibfk_1")
+  torneo           torneo  @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "usuario_torneo_ibfk_2")
+
+  @@index([torneo_id], map: "torneo_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model cantidad_jugadores {
+  cantidad_jugadores_id Int      @id @default(autoincrement())
+  cantidad_jugadores    String   @db.VarChar(50)
+  cancha                cancha[]
+  equipo                equipo[]
+  torneo                torneo[]
+}
+
+model categoria_equipo {
+  categoria_equipo_id Int      @id @default(autoincrement())
+  categoria_equipo    String   @db.VarChar(20)
+  equipo              equipo[]
+  torneo              torneo[]
+}
+
+model categoria_noticia {
+  categoria_noticia_id Int       @id @default(autoincrement())
+  categoria_noticia    String    @db.VarChar(20)
+  noticia              noticia[]
+}
