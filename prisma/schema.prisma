@@ -44,7 +44,7 @@ model cancha {
   sede_torneo           sede_torneo[]
   usuario_cancha        usuario_cancha[]
 
-  @@index([cantidad_jugadores_id], map: "fk_cancha_cantidad_jugadores")
+  @@index([cantidad_jugadores_id])
 }
 
 model equipo {
@@ -68,7 +68,7 @@ model equipo {
   usuario_equipo        usuario_equipo[]
 
   @@index([categoria_equipo_id])
-  @@index([cantidad_jugadores_id], map: "fk_equipo_cantidad_jugadores")
+  @@index([cantidad_jugadores_id])
 }
 
 model goleador {
@@ -178,7 +178,7 @@ model torneo {
   usuario_torneo            usuario_torneo[]
 
   @@index([categoria_equipo_id])
-  @@index([cantidad_jugadores_id], map: "fk_torneo_cantidad_jugadores")
+  @@index([cantidad_jugadores_id])
 }
 
 model usuario_cancha {
