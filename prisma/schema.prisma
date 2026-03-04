@@ -9,12 +9,12 @@ datasource db {
 
 model Usuario {
   usuario_id          Int                   @id @default(autoincrement())
-  nombre_usuario      String                @db.VarChar(50)
-  email_usuario       String                @unique(map: "email_usuario") @db.VarChar(50)
-  contrasena_usuario  String                @db.VarChar(255)
-  fecha_usuario       DateTime              @default(now()) @db.Timestamp(0)
+  nombre_usuario      String
+  email_usuario       String                @unique
+  contrasena_usuario  String
+  fecha_usuario       DateTime              @default(now())
   email_verificado    Boolean               @default(false)
-  ultima_sesion       DateTime?             @db.DateTime(0)
+  ultima_sesion       DateTime?
   publicacion_noticia publicacion_noticia[]
   usuario_cancha      usuario_cancha[]
   usuario_equipo      usuario_equipo[]
@@ -25,20 +25,20 @@ model Usuario {
 
 model cancha {
   cancha_id             Int                 @id @default(autoincrement())
-  nombre_cancha         String              @db.VarChar(50)
-  telefono_cancha       String?             @db.VarChar(20)
-  provincia_cancha      String?             @db.VarChar(20)
-  ubicacion_cancha      String?             @db.VarChar(100)
-  encargado_cancha      String?             @db.VarChar(50)
-  horario_cancha        String?             @db.VarChar(50)
-  grama_cancha          String?             @db.VarChar(50)
+  nombre_cancha         String
+  telefono_cancha       String?
+  provincia_cancha      String?
+  ubicacion_cancha      String?
+  encargado_cancha      String?
+  horario_cancha        String?
+  grama_cancha          String?
   cantidad_jugadores_id Int?
   precio_cancha         Int
-  servicios_cancha      String?             @db.VarChar(200)
-  sede_url              String?             @db.VarChar(250)
-  foto_sede_uno_url     String?             @db.VarChar(250)
-  foto_sede_dos_url     String?             @db.VarChar(250)
-  fecha_cancha          DateTime            @default(now()) @db.Timestamp(0)
+  servicios_cancha      String?
+  sede_url              String?
+  foto_sede_uno_url     String?
+  foto_sede_dos_url     String?
+  fecha_cancha          DateTime            @default(now())
   cantidad_jugadores    cantidad_jugadores? @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_cancha_cantidad_jugadores")
   sede_equipo           sede_equipo[]
   sede_torneo           sede_torneo[]
@@ -49,18 +49,18 @@ model cancha {
 
 model equipo {
   equipo_id             Int                    @id @default(autoincrement())
-  nombre_equipo         String                 @db.VarChar(50)
-  telefono_equipo       String?                @db.VarChar(20)
-  provincia_equipo      String?                @db.VarChar(20)
-  ubicacion_equipo      String?                @db.VarChar(100)
-  encargado_equipo      String?                @db.VarChar(50)
-  logros_equipo         String                 @db.VarChar(200)
+  nombre_equipo         String
+  telefono_equipo       String?
+  provincia_equipo      String?
+  ubicacion_equipo      String?
+  encargado_equipo      String?
+  logros_equipo         String
   categoria_equipo_id   Int?
   cantidad_jugadores_id Int?
-  logo_url              String?                @db.VarChar(250)
-  foto_equipo_uno_url   String?                @db.VarChar(250)
-  foto_equipo_dos_url   String?                @db.VarChar(250)
-  fecha_equipo          DateTime               @default(now()) @db.Timestamp(0)
+  logo_url              String?
+  foto_equipo_uno_url   String?
+  foto_equipo_dos_url   String?
+  fecha_equipo          DateTime               @default(now())
   categoria_equipo      categoria_equipo?      @relation(fields: [categoria_equipo_id], references: [categoria_equipo_id], onDelete: Restrict, onUpdate: Restrict, map: "equipo_ibfk_1")
   cantidad_jugadores    cantidad_jugadores?    @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_equipo_cantidad_jugadores")
   inscripciones_torneo  inscripciones_torneo[]
@@ -73,7 +73,7 @@ model equipo {
 
 model goleador {
   jugador_id           Int                  @id @default(autoincrement())
-  nombre_jugador       String               @db.VarChar(100)
+  nombre_jugador       String
   goles_jugador        Int
   inscripcionTorneo_id Int
   inscripciones_torneo inscripciones_torneo @relation(fields: [inscripcionTorneo_id], references: [inscripcionTorneo_id], onUpdate: Restrict, map: "goleador_ibfk_1")
@@ -83,7 +83,7 @@ model goleador {
 
 model inscripciones_torneo {
   inscripcionTorneo_id Int                @id @default(autoincrement())
-  fecha_inscripcion    DateTime           @default(now()) @db.Timestamp(0)
+  fecha_inscripcion    DateTime           @default(now())
   equipo_id            Int
   torneo_id            Int
   goleador             goleador[]
@@ -98,9 +98,9 @@ model inscripciones_torneo {
 model noticia {
   noticia_id           Int                   @id @default(autoincrement())
   categoria_noticia_id Int?
-  titulo_noticia       String                @db.VarChar(50)
-  texto_noticia        String                @db.VarChar(200)
-  foto_noticia_url     String?               @db.VarChar(250)
+  titulo_noticia       String
+  texto_noticia        String
+  foto_noticia_url     String?
   categoria_noticia    categoria_noticia?    @relation(fields: [categoria_noticia_id], references: [categoria_noticia_id], onDelete: Restrict, onUpdate: Restrict, map: "noticia_ibfk_1")
   publicacion_noticia  publicacion_noticia[]
 
@@ -111,7 +111,7 @@ model publicacion_noticia {
   publicacionNoticia_id Int      @id @default(autoincrement())
   noticia_id            Int
   usuario_id            Int
-  fecha_noticia         DateTime @default(now()) @db.Timestamp(0)
+  fecha_noticia         DateTime @default(now())
   noticia               noticia  @relation(fields: [noticia_id], references: [noticia_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_1")
   usuario               Usuario  @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_2")
 
@@ -154,23 +154,23 @@ model tabla_posiciones {
 
 model torneo {
   torneo_id                 Int                    @id @default(autoincrement())
-  nombre_torneo             String                 @db.VarChar(50)
-  telefono_torneo           String?                @db.VarChar(20)
-  provincia_torneo          String?                @db.VarChar(20)
-  ubicacion_torneo          String?                @db.VarChar(100)
-  encargado_torneo          String?                @db.VarChar(50)
+  nombre_torneo             String
+  telefono_torneo           String?
+  provincia_torneo          String?
+  ubicacion_torneo          String?
+  encargado_torneo          String?
   cantidad_equipos_torneo   Int?
   cantidad_jugadores_id     Int?
   categoria_equipo_id       Int?
-  especificaciones_torneo   String?                @db.VarChar(200)
+  especificaciones_torneo   String?
   precio_inscripcion_torneo Int
-  premioUno_torneo          String?                @db.VarChar(100)
-  premioDos_torneo          String?                @db.VarChar(100)
-  premioTres_torneo         String?                @db.VarChar(100)
-  logo_url                  String?                @db.VarChar(250)
-  fecha_torneo              DateTime               @default(now()) @db.Timestamp(0)
-  estado_torneo             String                 @db.VarChar(50)
-  fecha_inicio              DateTime               @db.Date
+  premioUno_torneo          String?
+  premioDos_torneo          String?
+  premioTres_torneo         String?
+  logo_url                  String?
+  fecha_torneo              DateTime               @default(now())
+  estado_torneo             String
+  fecha_inicio              DateTime
   inscripciones_torneo      inscripciones_torneo[]
   sede_torneo               sede_torneo[]
   cantidad_jugadores        cantidad_jugadores?    @relation(fields: [cantidad_jugadores_id], references: [cantidad_jugadores_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_torneo_cantidad_jugadores")
@@ -216,7 +216,7 @@ model usuario_torneo {
 
 model cantidad_jugadores {
   cantidad_jugadores_id Int      @id @default(autoincrement())
-  cantidad_jugadores    String   @db.VarChar(50)
+  cantidad_jugadores    String
   cancha                cancha[]
   equipo                equipo[]
   torneo                torneo[]
@@ -224,13 +224,13 @@ model cantidad_jugadores {
 
 model categoria_equipo {
   categoria_equipo_id Int      @id @default(autoincrement())
-  categoria_equipo    String   @db.VarChar(20)
+  categoria_equipo    String
   equipo              equipo[]
   torneo              torneo[]
 }
 
 model categoria_noticia {
   categoria_noticia_id Int       @id @default(autoincrement())
-  categoria_noticia    String    @db.VarChar(20)
+  categoria_noticia    String
   noticia              noticia[]
 }
