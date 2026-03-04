@@ -67,7 +67,7 @@ model equipo {
   sede_equipo           sede_equipo[]
   usuario_equipo        usuario_equipo[]
 
-  @@index([categoria_equipo_id], map: "categoria_equipo_id")
+  @@index([categoria_equipo_id])
   @@index([cantidad_jugadores_id], map: "fk_equipo_cantidad_jugadores")
 }
 
@@ -91,8 +91,8 @@ model inscripciones_torneo {
   torneo               torneo             @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "inscripciones_torneo_ibfk_2")
   tabla_posiciones     tabla_posiciones[]
 
-  @@index([equipo_id], map: "equipo_id")
-  @@index([torneo_id], map: "torneo_id")
+  @@index([equipo_id])
+  @@index([torneo_id])
 }
 
 model noticia {
@@ -104,7 +104,7 @@ model noticia {
   categoria_noticia    categoria_noticia?    @relation(fields: [categoria_noticia_id], references: [categoria_noticia_id], onDelete: Restrict, onUpdate: Restrict, map: "noticia_ibfk_1")
   publicacion_noticia  publicacion_noticia[]
 
-  @@index([categoria_noticia_id], map: "categoria_noticia_id")
+  @@index([categoria_noticia_id])
 }
 
 model publicacion_noticia {
@@ -115,8 +115,8 @@ model publicacion_noticia {
   noticia               noticia  @relation(fields: [noticia_id], references: [noticia_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_1")
   usuario               Usuario  @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "publicacion_noticia_ibfk_2")
 
-  @@index([noticia_id], map: "noticia_id")
-  @@index([usuario_id], map: "usuario_id")
+  @@index([noticia_id])
+  @@index([usuario_id])
 }
 
 model sede_equipo {
@@ -126,8 +126,8 @@ model sede_equipo {
   equipo        equipo @relation(fields: [equipo_id], references: [equipo_id], onUpdate: Restrict, map: "sede_equipo_ibfk_1")
   cancha        cancha @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "sede_equipo_ibfk_2")
 
-  @@index([cancha_id], map: "cancha_id")
-  @@index([equipo_id], map: "equipo_id")
+  @@index([cancha_id])
+  @@index([equipo_id])
 }
 
 model sede_torneo {
@@ -137,8 +137,8 @@ model sede_torneo {
   torneo        torneo @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "sede_torneo_ibfk_1")
   cancha        cancha @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "sede_torneo_ibfk_2")
 
-  @@index([cancha_id], map: "cancha_id")
-  @@index([torneo_id], map: "torneo_id")
+  @@index([cancha_id])
+  @@index([torneo_id])
 }
 
 model tabla_posiciones {
@@ -149,7 +149,7 @@ model tabla_posiciones {
   inscripcionTorneo_id Int
   inscripciones_torneo inscripciones_torneo @relation(fields: [inscripcionTorneo_id], references: [inscripcionTorneo_id], onUpdate: Restrict, map: "tabla_posiciones_ibfk_1")
 
-  @@index([inscripcionTorneo_id], map: "inscripcionTorneo_id")
+  @@index([inscripcionTorneo_id])
 }
 
 model torneo {
@@ -177,7 +177,7 @@ model torneo {
   categoria_equipo          categoria_equipo?      @relation(fields: [categoria_equipo_id], references: [categoria_equipo_id], onDelete: Restrict, onUpdate: Restrict, map: "torneo_ibfk_1")
   usuario_torneo            usuario_torneo[]
 
-  @@index([categoria_equipo_id], map: "categoria_equipo_id")
+  @@index([categoria_equipo_id])
   @@index([cantidad_jugadores_id], map: "fk_torneo_cantidad_jugadores")
 }
 
@@ -188,8 +188,8 @@ model usuario_cancha {
   usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_cancha_ibfk_1")
   cancha           cancha  @relation(fields: [cancha_id], references: [cancha_id], onUpdate: Restrict, map: "usuario_cancha_ibfk_2")
 
-  @@index([cancha_id], map: "cancha_id")
-  @@index([usuario_id], map: "usuario_id")
+  @@index([cancha_id])
+  @@index([usuario_id])
 }
 
 model usuario_equipo {
@@ -199,8 +199,8 @@ model usuario_equipo {
   usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_equipo_ibfk_1")
   equipo           equipo  @relation(fields: [equipo_id], references: [equipo_id], onUpdate: Restrict, map: "usuario_equipo_ibfk_2")
 
-  @@index([equipo_id], map: "equipo_id")
-  @@index([usuario_id], map: "usuario_id")
+  @@index([equipo_id])
+  @@index([usuario_id])
 }
 
 model usuario_torneo {
@@ -210,8 +210,8 @@ model usuario_torneo {
   usuario          Usuario @relation(fields: [usuario_id], references: [usuario_id], onUpdate: Restrict, map: "usuario_torneo_ibfk_1")
   torneo           torneo  @relation(fields: [torneo_id], references: [torneo_id], onUpdate: Restrict, map: "usuario_torneo_ibfk_2")
 
-  @@index([torneo_id], map: "torneo_id")
-  @@index([usuario_id], map: "usuario_id")
+  @@index([torneo_id])
+  @@index([usuario_id])
 }
 
 model cantidad_jugadores {
