@@ -64,10 +64,6 @@ export default function ContactoPage() {
               <div className="w-12 h-12 bg-[#111] border border-white/10 rounded-full flex items-center justify-center text-[#facf00] group-hover:bg-[#facf00] group-hover:text-black transition-all">
                 📱
               </div>
-              <div>
-                <p className="text-[10px] font-black text-gray-500 uppercase">WhatsApp Soporte</p>
-                <p className="font-bold text-white uppercase italic">+506 8888-8888</p>
-              </div>
             </div>
           </div>
         </div>
