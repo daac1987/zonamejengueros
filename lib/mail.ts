@@ -10,9 +10,9 @@ export const enviarCorreoVerificacion = async (email: string, url: string) => {
          DEBES usar 'onboarding@resend.dev' como remitente y solo 
          podrás enviar correos a la dirección con la que te registraste.
       */
-      from: 'Liga Pro <verificacion@zonamejengueros.com>',
+      from: 'Zona Mejengueros <verificacion@zonamejengueros.com>',
       to: email,
-      subject: '⚽ Activa tu cuenta de Capitán',
+      subject: '⚽ Activa tu cuenta de Admin - Zona Mejengueros',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 15px;">
           <h2 style="color: #333;">¡Bienvenido a la Liga!</h2>
