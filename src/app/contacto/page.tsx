@@ -59,12 +59,6 @@ export default function ContactoPage() {
                 <p className="font-bold text-white uppercase italic">info@mejengueros.com</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-6 group">
-              <div className="w-12 h-12 bg-[#111] border border-white/10 rounded-full flex items-center justify-center text-[#facf00] group-hover:bg-[#facf00] group-hover:text-black transition-all">
-                📱
-              </div>
-            </div>
           </div>
         </div>
 
@@ -78,6 +72,7 @@ export default function ContactoPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-black text-[#facf00] uppercase ml-2">Nombre Completo</label>
                 <input
+                  name='nombre'
                   required
                   type="text"
                   placeholder="Ej. Juan Pérez"
@@ -86,7 +81,7 @@ export default function ContactoPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-black text-[#facf00] uppercase ml-2">Asunto</label>
-                <select className="bg-black/50 border border-white/10 p-4 rounded-xl focus:border-[#facf00] outline-none text-white font-bold transition-all appearance-none">
+                <select className="bg-black/50 border border-white/10 p-4 rounded-xl focus:border-[#facf00] outline-none text-white font-bold transition-all appearance-none" name="asunto" required>
                   <option>SOPORTE TÉCNICO</option>
                   <option>PUBLICIDAD</option>
                   <option>REPORTE DE CANCHAS</option>
@@ -99,6 +94,7 @@ export default function ContactoPage() {
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-black text-[#facf00] uppercase ml-2">Correo Electrónico</label>
               <input
+                name='email'
                 required
                 type="email"
                 placeholder="tu@email.com"
@@ -109,6 +105,7 @@ export default function ContactoPage() {
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-black text-[#facf00] uppercase ml-2">Tu Mensaje</label>
               <textarea
+                name='mensaje'
                 required
                 rows={4}
                 placeholder="Cuéntanos cómo podemos ayudarte..."
@@ -120,8 +117,8 @@ export default function ContactoPage() {
               disabled={status !== 'idle'}
               type="submit"
               className={`w-full py-5 rounded-xl font-black italic uppercase tracking-widest transition-all ${status === 'success'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-[#facf00] text-black hover:bg-white active:scale-95'
+                ? 'bg-green-500 text-white'
+                : 'bg-[#facf00] text-black hover:bg-white active:scale-95'
                 }`}
             >
               {status === 'idle' && 'Enviar Mensaje'}
