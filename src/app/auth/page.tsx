@@ -58,7 +58,7 @@ export default function AuthPage() {
         } else {
           // --- NUEVA LÓGICA DE REGISTRO CON VERIFICACIÓN ---
           toast.success('¡FICHAJE INICIADO!', {
-            description: 'Te enviamos un enlace a tu correo. Debes confirmar tu cuenta para poder entrar al camerino.',
+            description: 'Te enviamos un enlace a tu correo. Debes confirmar tu cuenta para poder entrar al camerino. El correo puede tardar unos minutos en llegar, revisa tu bandeja de entrada y la carpeta de spam. ¡Gracias por unirte!',
             id: loadingToast,
             duration: 8000,
           });
