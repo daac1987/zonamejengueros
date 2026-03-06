@@ -152,7 +152,7 @@ export default function TeamSearch() {
                                         {equipo.provincia} • {equipo.modalidad}
                                     </div>
                                     <h3 className="text-5xl font-black italic text-white uppercase tracking-tighter mb-4 leading-none">
-                                        {equipo.nombre_equipo || equipo.nombre}
+                                        {equipo.nombre_equipo}
                                     </h3>
 
                                     <div className="space-y-3 mb-8">
