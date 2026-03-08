@@ -10,6 +10,7 @@ export default function FormTorneo({ onBack }: { onBack: () => void }) {
     const [canchas, setCanchas] = useState<{ id: number, nombre: string }[]>([]);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
 
     const [formData, setFormData] = useState({
         nombre_torneo: '',
@@ -47,23 +48,42 @@ export default function FormTorneo({ onBack }: { onBack: () => void }) {
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Validación de peso (4MB)
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("El logo es muy pesado (máximo 4MB)");
+            return;
+        }
+
+        setUploadingLogo(true);
+        const toastId = toast.loading("Subiendo logo del torneo...");
+
         try {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: JSON.stringify({ file: reader.result, fileName: file.name }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await res.json();
-                if (data.url) {
-                    setFormData(prev => ({ ...prev, logo_url: data.url }));
-                    toast.success("Logo cargado");
-                }
-            };
+
+            const base64 = await new Promise<string>((resolve) => {
+                reader.onload = () => resolve(reader.result as string);
+            });
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: JSON.stringify({ file: base64, fileName: file.name }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.url) {
+                setFormData(prev => ({ ...prev, logo_url: data.url }));
+                toast.success("Logo cargado con éxito", { id: toastId });
+            } else {
+                throw new Error("Error en la respuesta del servidor");
+            }
         } catch (error) {
-            toast.error("Error al subir imagen");
+            toast.error("No se pudo subir el logo", { id: toastId });
+        } finally {
+            setUploadingLogo(false);
         }
     };
 
@@ -259,29 +279,42 @@ export default function FormTorneo({ onBack }: { onBack: () => void }) {
                         <h3 className="text-white font-black italic text-[10px] uppercase mb-4 flex items-center gap-2">
                             <Camera size={14} /> LOGO DEL TORNEO
                         </h3>
-                        <div className="relative group bg-[#111] border-2 border-dashed border-white/10 rounded-3xl h-52 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all">
-                            {formData.logo_url ? (
-                                <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" />
+                        <div className={`relative group bg-[#111] border-2 border-dashed ${uploadingLogo ? 'border-[#facf00]' : 'border-white/10'} rounded-3xl h-52 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all`}>
+
+                            {uploadingLogo ? (
+                                <div className="flex flex-col items-center animate-pulse">
+                                    <div className="w-8 h-8 border-2 border-[#facf00] border-t-transparent rounded-full animate-spin mb-2"></div>
+                                    <span className="text-[9px] font-black text-[#facf00] uppercase">Procesando...</span>
+                                </div>
+                            ) : formData.logo_url ? (
+                                <>
+                                    <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <label className="cursor-pointer text-[#facf00] text-[10px] font-black uppercase italic">
+                                            Cambiar Logo
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                        </label>
+                                    </div>
+                                </>
                             ) : (
-                                <label className="cursor-pointer flex flex-col items-center">
-                                    <Plus className="text-gray-500 group-hover:text-[#facf00] mb-2" />
+                                <label className="cursor-pointer flex flex-col items-center group/btn">
+                                    <Plus className="text-gray-500 group-hover/btn:text-[#facf00] mb-2 transition-colors" />
                                     <span className="text-[9px] text-gray-500 font-black uppercase">Subir Logo</span>
-                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} required />
                                 </label>
                             )}
                         </div>
                     </div>
 
+                    {/* Botón de Publicar actualizado */}
                     <div className="bg-[#facf00] p-8 rounded-[2.5rem] text-black shadow-2xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Calendar size={20} className="font-black" />
-                            <h3 className="text-2xl font-black italic uppercase leading-none">PUBLICAR</h3>
-                        </div>
-                        <p className="text-[10px] font-bold uppercase leading-tight mb-8 opacity-70">
-                            Al publicar, el torneo aparecerá en la sección de inscripciones abiertas.
-                        </p>
-                        <button type="submit" disabled={loading} className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50">
-                            {loading ? 'CREANDO...' : 'LANZAR TORNEO'}
+                        {/* ... (encabezado del botón) */}
+                        <button
+                            type="submit"
+                            disabled={loading || uploadingLogo}
+                            className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50"
+                        >
+                            {loading ? 'CREANDO...' : uploadingLogo ? 'ESPERE IMAGEN...' : 'LANZAR TORNEO'}
                         </button>
                     </div>
                 </div>

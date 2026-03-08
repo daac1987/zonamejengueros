@@ -139,15 +139,48 @@ export default function DashboardTorneo() {
         if (resNot.ok) setCategoriasNoticias(await resNot.json());
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, campo: string) => {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, campo: string) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Validación básica de tamaño
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("La imagen es muy pesada (máximo 4MB)");
+            return;
+        }
+
+        const tId = toast.loading('Subiendo imagen...');
+        setIsUploading(true);
+
         const reader = new FileReader();
-        reader.onloadend = () => {
-            if (campo === 'noticia') {
-                setNuevaNoticia(prev => ({ ...prev, foto_noticia_url: reader.result as string }));
-            } else {
-                setTorneo(prev => ({ ...prev, [campo]: reader.result as string }));
+        reader.onloadend = async () => {
+            const base64 = reader.result as string;
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file: base64 }),
+                });
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    // Si el campo es para la noticia nueva
+                    if (campo === 'noticia') {
+                        setNuevaNoticia(prev => ({ ...prev, foto_noticia_url: data.url }));
+                    } else {
+                        // Si es logo_url, foto_uno, etc., del torneo
+                        setTorneo(prev => ({ ...prev, [campo]: data.url }));
+                    }
+                    toast.success('Imagen cargada', { id: tId });
+                } else {
+                    toast.error('Error al subir a la nube', { id: tId });
+                }
+            } catch (error) {
+                toast.error('Error de conexión', { id: tId });
+            } finally {
+                setIsUploading(false);
             }
         };
         reader.readAsDataURL(file);
@@ -227,9 +260,30 @@ export default function DashboardTorneo() {
             <header className="max-w-7xl mx-auto mb-12 flex items-center justify-between border-b border-white/10 pb-8">
                 <div className="flex items-center gap-6">
                     <div className="w-24 h-24 bg-zinc-900 border-2 border-[#facf00] rounded-2xl overflow-hidden relative group">
-                        <img src={torneo.logo_url || '/placeholder.png'} className="w-full h-full object-cover" />
-                        <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer">
-                            <Camera size={20} /><input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'logo_url')} />
+                        {/* Imagen actual o placeholder */}
+                        <img
+                            src={torneo.logo_url || '/placeholder.png'}
+                            className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-30' : 'opacity-100'}`}
+                            alt="Logo Torneo"
+                        />
+
+                        {/* Label interactivo */}
+                        <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                            {!isUploading ? (
+                                <>
+                                    <Camera size={20} className="text-white" />
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={e => handleFileUpload(e, 'logo_url')}
+                                        disabled={isUploading}
+                                    />
+                                </>
+                            ) : (
+                                // Spinner de carga mientras isUploading es true
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#facf00]"></div>
+                            )}
                         </label>
                     </div>
                     <div>
@@ -521,43 +575,43 @@ export default function DashboardTorneo() {
                         torneo_id={Number(torneo.torneo_id)}
                     />
 
-                {/* --- LADO DERECHO: NOTICIAS DEL EQUIPO --- */}
-                <div className="lg:col-span-7 space-y-8">
-                    {usuario_id && (
-                        <FormularioNoticia
-                            usuarioId={usuario_id}
-                            onNoticiaCreada={() => cargarDatos(usuario_id)}
-                        />
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {noticias.length > 0 ? (
-                            noticias.map((noticia) => (
-                                <CardNoticia
-                                    key={noticia.noticia_id}
-                                    noticia={noticia}
-                                    nombreCancha={torneo.nombre_torneo}
-                                    categorias={categoriasNoticias}
-                                    onDelete={handleDeleteNews}
-                                />
-                            ))
-                        ) : (
-                            <div className="col-span-full py-20 border-2 border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center bg-[#111]/50">
-                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                                    <ImageIcon className="text-zinc-600" size={32} />
-                                </div>
-                                <h3 className="text-zinc-500 font-black italic uppercase tracking-widest text-xl">
-                                    Sin crónicas publicadas
-                                </h3>
-                                <p className="text-zinc-700 font-bold text-[10px] uppercase mt-2 italic">
-                                    Tus noticias aparecerán aquí una vez que las publiques
-                                </p>
-                            </div>
+                    {/* --- LADO DERECHO: NOTICIAS DEL EQUIPO --- */}
+                    <div className="lg:col-span-7 space-y-8">
+                        {usuario_id && (
+                            <FormularioNoticia
+                                usuarioId={usuario_id}
+                                onNoticiaCreada={() => cargarDatos(usuario_id)}
+                            />
                         )}
-                    </div>
-                </div>
 
-        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {noticias.length > 0 ? (
+                                noticias.map((noticia) => (
+                                    <CardNoticia
+                                        key={noticia.noticia_id}
+                                        noticia={noticia}
+                                        nombreCancha={torneo.nombre_torneo}
+                                        categorias={categoriasNoticias}
+                                        onDelete={handleDeleteNews}
+                                    />
+                                ))
+                            ) : (
+                                <div className="col-span-full py-20 border-2 border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center bg-[#111]/50">
+                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                                        <ImageIcon className="text-zinc-600" size={32} />
+                                    </div>
+                                    <h3 className="text-zinc-500 font-black italic uppercase tracking-widest text-xl">
+                                        Sin crónicas publicadas
+                                    </h3>
+                                    <p className="text-zinc-700 font-bold text-[10px] uppercase mt-2 italic">
+                                        Tus noticias aparecerán aquí una vez que las publiques
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                </div>
             </main >
         </div >
     );

@@ -75,29 +75,38 @@ export default function DashboardCancha() {
         }
     };
 
+    const [isUploading, setIsUploading] = useState(false);
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, campo: string) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const tId = toast.loading('Subiendo imagen...');
-        const reader = new FileReader();
+        // Feedback visual inmediato
+        setIsUploading(true);
+        const tId = toast.loading('Subiendo imagen a la nube...');
 
+        const reader = new FileReader();
         reader.onloadend = async () => {
             const base64 = reader.result as string;
             try {
                 const res = await fetch('/api/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ file: base64, fileName: file.name }),
+                    body: JSON.stringify({ file: base64 }),
                 });
                 const data = await res.json();
 
                 if (res.ok && data.url) {
+                    // Actualizamos el campo dinámicamente (sede_url, foto_cancha_uno_url, etc)
                     setCancha(prev => ({ ...prev, [campo]: data.url }));
                     toast.success('Imagen lista', { id: tId });
+                } else {
+                    toast.error('Error al subir', { id: tId });
                 }
             } catch (error) {
-                toast.error('Error al subir archivo', { id: tId });
+                toast.error('Error de red', { id: tId });
+            } finally {
+                setIsUploading(false);
             }
         };
         reader.readAsDataURL(file);
@@ -241,16 +250,66 @@ export default function DashboardCancha() {
                             <textarea value={cancha.link_maps} onChange={e => setCancha({ ...cancha, link_maps: e.target.value })} className="w-full bg-black p-4 rounded-xl border border-white/5 h-20 outline-none focus:border-[#facf00] text-sm" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
+                            {/* FOTO 1 */}
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
-                                {cancha.foto_cancha_uno_url ? <img src={cancha.foto_cancha_uno_url} className="w-full h-full object-cover rounded-lg" alt="Cancha 1" /> : <div className="h-full flex items-center justify-center"><Plus className="text-zinc-700" /></div>}
-                                <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_cancha_uno_url')} />
+                                {cancha.foto_cancha_uno_url ? (
+                                    <img
+                                        src={cancha.foto_cancha_uno_url}
+                                        className="w-full h-full object-cover rounded-lg transition-transform group-hover/img:scale-105"
+                                        alt="Cancha 1"
+                                    />
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-zinc-700">
+                                        <Plus size={24} />
+                                        <span className="text-[9px] font-black uppercase italic mt-1">Foto Principal</span>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={e => handleFileUpload(e, 'foto_cancha_uno_url')}
+                                    disabled={isUploading}
+                                />
+                                {/* Overlay de carga */}
+                                {isUploading && (
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#facf00]"></div>
+                                    </div>
+                                )}
                             </label>
+
+                            {/* FOTO 2 */}
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
-                                {cancha.foto_cancha_dos_url ? <img src={cancha.foto_cancha_dos_url} className="w-full h-full object-cover rounded-lg" alt="Cancha 2" /> : <div className="h-full flex items-center justify-center"><Plus className="text-zinc-700" /></div>}
-                                <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_cancha_dos_url')} />
+                                {cancha.foto_cancha_dos_url ? (
+                                    <img
+                                        src={cancha.foto_cancha_dos_url}
+                                        className="w-full h-full object-cover rounded-lg transition-transform group-hover/img:scale-105"
+                                        alt="Cancha 2"
+                                    />
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-zinc-700">
+                                        <Plus size={24} />
+                                        <span className="text-[9px] font-black uppercase italic mt-1">Foto Secundaria</span>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={e => handleFileUpload(e, 'foto_cancha_dos_url')}
+                                    disabled={isUploading}
+                                />
                             </label>
                         </div>
-                        <button className="w-full bg-[#facf00] text-black font-black uppercase italic py-4 rounded-2xl hover:bg-white transition-all shadow-lg transform active:scale-95">Guardar Cambios</button>
+                        <button
+                            disabled={isUploading}
+                            className={`w-full font-black uppercase italic py-4 rounded-2xl transition-all shadow-lg transform active:scale-95 
+                            ${isUploading ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-[#facf00] text-black hover:bg-white'}`}
+                        >
+                            {isUploading ? 'Subiendo Archivos...' : 'Guardar Cambios'}
+                        </button>
+
                     </form>
                 </div>
 

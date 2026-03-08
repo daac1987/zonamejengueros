@@ -1,41 +1,29 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { v2 as cloudinary } from 'cloudinary';
+import { NextResponse } from 'next/server';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.json();
-    const { file, fileName } = formData;
+    const { file } = await req.json();
 
     if (!file) {
-      return NextResponse.json({ error: "No hay archivo" }, { status: 400 });
+      return NextResponse.json({ error: "No se proporcionó ningún archivo" }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    // 1. LIMPIEZA DEL NOMBRE DEL ARCHIVO
-    // Quitamos espacios, acentos y caracteres extraños
-    const cleanFileName = fileName
-      .toLowerCase()
-      .normalize("NFD")               // Descompone caracteres con acentos
-      .replace(/[\u0300-\u036f]/g, "") // Elimina los acentos
-      .replace(/\s+/g, "-")            // Cambia espacios por guiones
-      .replace(/[^a-z0-0.\-]/g, "");   // Quita todo lo que no sea letra, número o punto
-
-    // 2. Nombre único
-    const uniqueName = `${Date.now()}-${cleanFileName}`;
-    const filePath = path.join(uploadDir, uniqueName);
-
-    // 3. Convertir y guardar
-    const buffer = Buffer.from(file.replace(/^data:image\/\w+;base64,/, ""), "base64");
-    await writeFile(filePath, buffer);
-
-    return NextResponse.json({ 
-      url: `/uploads/${uniqueName}` 
+    // Subida a Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(file, {
+      folder: 'zona_mejengueros', // Organiza tus fotos en una carpeta
+      resource_type: 'auto',
     });
-  } catch (error) {
-    console.error("Error al subir:", error);
-    return NextResponse.json({ error: "Error al guardar imagen" }, { status: 500 });
+
+    return NextResponse.json({ url: uploadResponse.secure_url });
+  } catch (error: any) {
+    console.error("Error en Cloudinary:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

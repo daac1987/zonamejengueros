@@ -22,6 +22,7 @@ export default function DashboardEquipo() {
     const [modalidades, setModalidades] = useState<any[]>([]);
     const [tieneSede, setTieneSede] = useState(false);
     const [canchaSeleccionada, setCanchaSeleccionada] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const [equipo, setEquipo] = useState({
         equipo_id: '',
@@ -114,32 +115,41 @@ export default function DashboardEquipo() {
         }
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, campo: string) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const tId = toast.loading('Subiendo imagen del club...');
-        const reader = new FileReader();
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("La imagen es muy pesada (máximo 4MB)");
+            return;
+        }
 
-        reader.onloadend = async () => {
-            const base64 = reader.result as string;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
             try {
+                setLoading(true);
                 const res = await fetch('/api/upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ file: base64, fileName: file.name }),
+                    body: JSON.stringify({ file: reader.result }),
+                    headers: { 'Content-Type': 'application/json' }
                 });
+
                 const data = await res.json();
 
-                if (res.ok && data.url) {
-                    setEquipo(prev => ({ ...prev, [campo]: data.url }));
-                    toast.success('Imagen lista', { id: tId });
+                if (data.url) {
+                    // AQUÍ LA CORRECCIÓN: Usamos setEquipo y el campo dinámico
+                    setEquipo(prev => ({ ...prev, [field]: data.url }));
+                    toast.success("Imagen cargada correctamente");
+                } else {
+                    toast.error(data.error || "Error al subir");
                 }
             } catch (error) {
-                toast.error('Error al subir archivo', { id: tId });
+                toast.error("Error de conexión al subir imagen");
+            } finally {
+                setLoading(false);
             }
         };
-        reader.readAsDataURL(file);
     };
 
     const handleUpdate = async (e: React.FormEvent) => {
@@ -190,7 +200,7 @@ export default function DashboardEquipo() {
                     <div className="w-24 h-24 bg-zinc-900 border-2 border-[#facf00] rounded-2xl overflow-hidden relative group">
                         <img src={equipo.logo_url || '/placeholder-team.png'} className="w-full h-full object-cover" alt="Escudo" />
                         <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer">
-                            <Camera size={20} /><input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'logo_url')} />
+                            <Camera size={20} /><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
                         </label>
                     </div>
                     <div>
@@ -337,16 +347,19 @@ export default function DashboardEquipo() {
                         <div className="grid grid-cols-2 gap-4">
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
                                 {equipo.foto_equipo_uno_url ? <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 1" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14} /> Foto 1</div>}
-                                <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_equipo_uno_url')} />
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'foto_equipo_uno_url')} />
                             </label>
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
                                 {equipo.foto_equipo_dos_url ? <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 2" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14} /> Foto 2</div>}
-                                <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_equipo_dos_url')} />
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'foto_equipo_dos_url')} />
                             </label>
                         </div>
 
-                        <button className="w-full bg-[#facf00] text-black font-black uppercase italic py-4 rounded-2xl hover:bg-white transition-all shadow-lg transform active:scale-95">
-                            Guardar Plantilla
+                        <button
+                            disabled={loading}
+                            className={`w-full font-black uppercase italic py-4 rounded-2xl transition-all shadow-lg transform active:scale-95 ${loading ? 'bg-zinc-700 cursor-not-allowed' : 'bg-[#facf00] text-black hover:bg-white'}`}
+                        >
+                            {loading ? 'Subiendo Imagen...' : 'Guardar Plantilla'}
                         </button>
                     </form>
                 </div>

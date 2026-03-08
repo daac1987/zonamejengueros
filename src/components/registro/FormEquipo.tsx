@@ -11,6 +11,7 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
     const [canchas, setCanchas] = useState<{ id: number, nombre: string }[]>([]);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [uploadingField, setUploadingField] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         nombre_equipo: '',
@@ -44,23 +45,43 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Validación de tamaño (ej. 4MB)
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("La imagen es muy pesada (máximo 4MB)");
+            return;
+        }
+
+        setUploadingField(field);
+        const toastId = toast.loading(`Subiendo ${field.replace('_url', '').replace('_', ' ')}...`);
+
         try {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: JSON.stringify({ file: reader.result, fileName: file.name }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await res.json();
-                if (data.url) {
-                    setFormData(prev => ({ ...prev, [field]: data.url }));
-                    toast.success("Imagen lista");
-                }
-            };
+
+            // Convertimos la lectura en una promesa para manejar el async/await correctamente
+            const base64 = await new Promise<string>((resolve) => {
+                reader.onload = () => resolve(reader.result as string);
+            });
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: JSON.stringify({ file: base64, fileName: file.name }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.url) {
+                setFormData(prev => ({ ...prev, [field]: data.url }));
+                toast.success("Imagen cargada correctamente", { id: toastId });
+            } else {
+                throw new Error("Error en la subida");
+            }
         } catch (error) {
-            toast.error("Error al subir imagen");
+            toast.error("No se pudo subir la imagen", { id: toastId });
+        } finally {
+            setUploadingField(null);
         }
     };
 
@@ -210,13 +231,43 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
                             ].map((img, i) => (
                                 <div key={i} className="space-y-2">
                                     <label className="text-[10px] font-black text-gray-500 uppercase ml-2">{img.label}</label>
-                                    <div className="relative group bg-[#111] border-2 border-dashed border-white/10 rounded-2xl h-40 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all">
-                                        {formData[img.field as keyof typeof formData] ? (
-                                            <img src={formData[img.field as keyof typeof formData]} className="w-full h-full object-cover"/>
+                                    <div className={`relative group bg-[#111] border-2 border-dashed ${uploadingField === img.field ? 'border-[#facf00]' : 'border-white/10'} rounded-2xl h-40 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all`}>
+
+                                        {uploadingField === img.field ? (
+                                            <div className="flex flex-col items-center animate-pulse">
+                                                <div className="w-6 h-6 border-2 border-[#facf00] border-t-transparent rounded-full animate-spin mb-2"></div>
+                                                <span className="text-[8px] font-black text-[#facf00] uppercase">Subiendo...</span>
+                                            </div>
+                                        ) : formData[img.field as keyof typeof formData] ? (
+                                            <>
+                                                <img
+                                                    src={formData[img.field as keyof typeof formData]}
+                                                    className="w-full h-full object-cover"
+                                                    alt="Preview"
+                                                />
+                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                    <label className="cursor-pointer text-[#facf00] text-[10px] font-black uppercase italic">
+                                                        Cambiar Foto
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={e => handleImageUpload(e, img.field)}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </>
                                         ) : (
-                                            <label className="cursor-pointer flex flex-col items-center">
-                                                <Plus className="text-gray-500 group-hover:text-[#facf00]" />
-                                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, img.field)} required />
+                                            <label className="cursor-pointer flex flex-col items-center group/btn">
+                                                <Plus className="text-gray-500 group-hover/btn:text-[#facf00] transition-colors" />
+                                                <span className="text-[9px] font-black text-gray-500 uppercase mt-1">Subir Foto</span>
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={e => handleImageUpload(e, img.field)}
+                                                    required={img.field === 'logo_url'} // Solo el logo es obligatorio
+                                                />
                                             </label>
                                         )}
                                     </div>
@@ -233,8 +284,12 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
                         <p className="text-[10px] font-bold uppercase leading-tight mb-8 opacity-70">
                             Tu equipo será visible para retos y torneos oficiales.
                         </p>
-                        <button type="submit" disabled={loading} className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50">
-                            {loading ? 'FUNDANDO...' : 'REGISTRAR EQUIPO'}
+                        <button
+                            type="submit"
+                            disabled={loading || !!uploadingField}
+                            className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
+                        >
+                            {loading ? 'FUNDANDO...' : uploadingField ? 'CARGANDO IMAGEN...' : 'REGISTRAR EQUIPO'}
                         </button>
                     </div>
                 </div>

@@ -9,6 +9,7 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
     const [cantidadJugadores, setCantidadJugadores] = useState<{ cantidad_jugadores_id: number, cantidad_jugadores: string }[]>([]);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         nombre_cancha: '',
         telefono_cancha: '',
@@ -86,6 +87,15 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Validación de tamaño (ej. 4MB)
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("La imagen es demasiado grande (máx 4MB)");
+            return;
+        }
+
+        setUploadingImage(field); // Bloqueamos visualmente este campo
+        const uploadToast = toast.loading(`Subiendo ${field}...`);
+
         try {
             const base64 = await fileToBase64(file);
             const res = await fetch('/api/upload', {
@@ -95,12 +105,17 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
             });
 
             const data = await res.json();
-            if (data.url) {
+
+            if (res.ok && data.url) {
                 setFormData(prev => ({ ...prev, [field]: data.url }));
-                toast.success("Imagen cargada");
+                toast.success("Imagen lista", { id: uploadToast });
+            } else {
+                throw new Error("Error en la respuesta del servidor");
             }
         } catch (error) {
-            toast.error("Error subiendo imagen");
+            toast.error("No se pudo subir la imagen", { id: uploadToast });
+        } finally {
+            setUploadingImage(null);
         }
     };
 
@@ -208,45 +223,48 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
                     </div>
 
                     {/* Bloque 3: Galería (URLs de imágenes) */}
-                    <div className="bg-[#1a1a1a]/40 border border-white/5 p-8 rounded-[2rem]">
-                        <h3 className="text-white font-black italic text-sm uppercase mb-6 flex items-center gap-2">
-                            <Camera size={16} /> GALERÍA DE LA SEDE
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {[
-                                { label: 'FOTO PRINCIPAL', field: 'sede_url' },
-                                { label: 'FOTO INTERIOR', field: 'foto_sede_uno_url' },
-                                { label: 'FOTO FACHADA', field: 'foto_sede_dos_url' }
-                            ].map((img, index) => (
-                                <div key={index} className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase ml-2">{img.label}</label>
-                                    <div className="relative group bg-[#111] border-2 border-dashed border-white/10 rounded-2xl h-40 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all">
-                                        {formData[img.field as keyof typeof formData] ? (
-                                            <>
-                                                <img
-                                                    src={formData[img.field as keyof typeof formData]}
-                                                    className="w-full h-full object-cover"
-                                                    alt="Preview"
-                                                />
-                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                    <label className="cursor-pointer text-[#facf00] text-[10px] font-black uppercase italic">
-                                                        Cambiar Foto
-                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, img.field)} />
-                                                    </label>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <label className="cursor-pointer flex flex-col items-center group">
-                                                <Plus className="text-gray-500 group-hover:text-[#facf00] mb-2" />
-                                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Subir Imagen</span>
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, img.field)} />
-                                            </label>
-                                        )}
-                                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                            { label: 'FOTO PRINCIPAL', field: 'sede_url' },
+                            { label: 'FOTO INTERIOR', field: 'foto_sede_uno_url' },
+                            { label: 'FOTO FACHADA', field: 'foto_sede_dos_url' }
+                        ].map((img, index) => (
+                            <div key={index} className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-500 uppercase ml-2">{img.label}</label>
+                                <div className={`relative group bg-[#111] border-2 border-dashed ${uploadingImage === img.field ? 'border-[#facf00]' : 'border-white/10'} rounded-2xl h-40 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all`}>
+
+                                    {/* Si se está subiendo esta imagen específica */}
+                                    {uploadingImage === img.field ? (
+                                        <div className="flex flex-col items-center animate-pulse">
+                                            <div className="w-6 h-6 border-2 border-[#facf00] border-t-transparent rounded-full animate-spin mb-2"></div>
+                                            <span className="text-[8px] font-black text-[#facf00] uppercase">Subiendo...</span>
+                                        </div>
+                                    ) : formData[img.field as keyof typeof formData] ? (
+                                        <>
+                                            <img
+                                                src={formData[img.field as keyof typeof formData]}
+                                                className="w-full h-full object-cover"
+                                                alt="Preview"
+                                            />
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                <label className="cursor-pointer text-[#facf00] text-[10px] font-black uppercase italic">
+                                                    Cambiar Foto
+                                                    <input disabled={!!uploadingImage} type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, img.field)} />
+                                                </label>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <label className="cursor-pointer flex flex-col items-center group">
+                                            <Plus className="text-gray-500 group-hover:text-[#facf00] mb-2" />
+                                            <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Subir Imagen</span>
+                                            <input disabled={!!uploadingImage} type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, img.field)} />
+                                        </label>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
+
 
                 </div>
 
@@ -259,10 +277,10 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
                         </p>
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform shadow-2xl disabled:opacity-50"
+                            disabled={loading || !!uploadingImage}
+                            className="w-full bg-black text-[#facf00] py-6 rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm hover:scale-105 transition-transform shadow-2xl disabled:opacity-50 disabled:scale-100"
                         >
-                            {loading ? 'REGISTRANDO...' : 'FINALIZAR REGISTRO'}
+                            {loading ? 'REGISTRANDO...' : uploadingImage ? 'ESPERANDO IMAGEN...' : 'FINALIZAR REGISTRO'}
                         </button>
                     </div>
 
