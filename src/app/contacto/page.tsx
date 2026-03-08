@@ -56,7 +56,7 @@ export default function ContactoPage() {
               </div>
               <div>
                 <p className="text-[10px] font-black text-gray-500 uppercase">Email Oficial</p>
-                <p className="font-bold text-white uppercase italic">info@mejengueros.com</p>
+                <p className="font-bold text-white uppercase italic">info@zonamejengueros.com</p>
               </div>
             </div>
           </div>

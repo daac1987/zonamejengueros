@@ -7,7 +7,7 @@ export default function Navbar() {
     // Cambiamos p-3 por py-1 (padding vertical mínimo) y px-6 (padding horizontal)
     <nav className="sticky top-0 z-50 flex items-center justify-center py-1 px-6 bg-transparent backdrop-blur-md border-b border-white/5 h-14">
 
-      <div className="flex items-center pt-1">
+      <div className="flex items-center pt-3">
         <Link href="/">
           <Image
             src="/logo4.png"

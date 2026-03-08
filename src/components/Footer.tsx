@@ -50,7 +50,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-black italic mb-6 uppercase tracking-widest text-sm">Síguenos</h4>
             <div className="flex gap-4 mb-6">
-              <div className="w-10 h-10 bg-[#111] rounded-full flex items-center justify-center hover:bg-[#facf00] hover:text-black transition-all cursor-pointer">
+             {/* <div className="w-10 h-10 bg-[#111] rounded-full flex items-center justify-center hover:bg-[#facf00] hover:text-black transition-all cursor-pointer">
                 <span className="font-black text-xs uppercase">IG</span>
               </div>
               <div className="w-10 h-10 bg-[#111] rounded-full flex items-center justify-center hover:bg-[#facf00] hover:text-black transition-all cursor-pointer">
@@ -58,7 +58,7 @@ export default function Footer() {
               </div>
               <div className="w-10 h-10 bg-[#111] rounded-full flex items-center justify-center hover:bg-[#facf00] hover:text-black transition-all cursor-pointer">
                 <span className="font-black text-xs uppercase">TK</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
