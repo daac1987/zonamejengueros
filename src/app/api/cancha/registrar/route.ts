@@ -19,7 +19,8 @@ export async function POST(req: Request) {
       servicios_cancha,
       sede_url,
       foto_sede_uno_url,
-      foto_sede_dos_url
+      foto_sede_dos_url,
+      link_maps
     } = data;
 
     // Tipamos explícitamente el parámetro 'tx' como Prisma.TransactionClient
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
           sede_url,
           foto_sede_uno_url,
           foto_sede_dos_url,
+          link_maps
         },
       });
 

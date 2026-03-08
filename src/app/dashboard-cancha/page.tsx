@@ -61,7 +61,8 @@ export default function DashboardCancha() {
                     servicios_cancha: data.servicios_cancha || '',
                     sede_url: data.sede_url || '',
                     foto_cancha_uno_url: data.foto_sede_uno_url || '',
-                    foto_cancha_dos_url: data.foto_sede_dos_url || ''
+                    foto_cancha_dos_url: data.foto_sede_dos_url || '',
+                    link_maps: data.link_maps || '',
                 });
             }
 
