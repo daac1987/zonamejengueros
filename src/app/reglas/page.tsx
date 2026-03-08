@@ -35,7 +35,7 @@ const REGLAS = [
 
 export default function ReglamentoPage() {
   return (
-    <div className="min-h-screen pt-28 pb-20 px-4 max-w-4xl mx-auto">
+    <div className="min-h-screen pt-20 pb-20 px-4 max-w-4xl mx-auto">
       {/* Encabezado Estilo Manifiesto */}
       <div className="text-center mb-16">
         <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none mb-4">

@@ -42,7 +42,7 @@ export default function TorneosPage() {
     if (loading) return <div className="min-h-screen flex items-center justify-center text-[#facf00] font-black italic tracking-tighter text-4xl">CARGANDO ARENA...</div>;
 
     return (
-        <div className="min-h-screen pt-28 pb-20 px-4 max-w-7xl mx-auto">
+        <div className="min-h-screen pt-20 pb-20 px-4 max-w-7xl mx-auto">
 
             {/* HEADER */}
             <div className="text-center mb-16">

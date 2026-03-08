@@ -36,7 +36,7 @@ export default function ContactoPage() {
   };
 
   return (
-    <div className="min-h-screen pt-28 pb-20 px-4 max-w-6xl mx-auto">
+    <div className="min-h-screen pt-20 pb-20 px-4 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
         {/* LADO IZQUIERDO: TEXTO E INFO */}

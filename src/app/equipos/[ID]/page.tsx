@@ -53,7 +53,7 @@ export default function TeamProfile({ params }: { params: Promise<{ ID: string }
   );
 
   return (
-    <div className="min-h-screen pt-5 pb-10 px-4 max-w-6xl mx-auto">
+    <div className="min-h-screen pt-20 pb-10 px-4 max-w-6xl mx-auto">
 
       {/* --- BLOQUE 1: GALERÍA BENTO (Fotos Grandes) --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -82,7 +82,7 @@ export default function TeamProfile({ params }: { params: Promise<{ ID: string }
             {equipo.foto_equipo_dos_url && <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
           </div>
           <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            {sede?.sede_url && <img src={sede.sede_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
+            {equipo.foto_equipo_uno_url && <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
           </div>
         </div>
       </div>
@@ -157,37 +157,50 @@ export default function TeamProfile({ params }: { params: Promise<{ ID: string }
               )}
             </div>
 
-            {/* Bloque de Servicios (Limitado a 6) */}
-            <div className="bg-[#111] p-6 rounded-3xl border border-white/5">
-              <h4 className="text-white font-black italic uppercase text-xs mb-4 tracking-[0.2em]">SERVICIOS DE NUESTRA CASA</h4>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-3">
-                {sede?.servicios_cancha ? (
-                  (Array.isArray(sede.servicios_cancha)
-                    ? sede.servicios_cancha
-                    : sede.servicios_cancha.split(',')
-                  )
-                    .slice(0, 6) // 🔥 Aquí limitamos a máximo 6 elementos
-                    .map((s: string, i: number) => (
-                      <p key={i} className="text-gray-400 text-[10px] font-bold uppercase italic flex items-center gap-2">
-                        <span className="text-[#facf00] text-xs">✔</span> {s.trim()}
+            {/* Bloque de Servicios (Validación de existencia de sede) */}
+            <div className="bg-[#111] p-6 rounded-3xl border border-white/5 h-full flex flex-col justify-between">
+              <div>
+                <h4 className="text-white font-black italic uppercase text-xs mb-4 tracking-[0.2em]">
+                  {sede ? "SERVICIOS DE NUESTRA CASA" : "ESTADO DE LOCALÍA"}
+                </h4>
+
+                <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+                  {sede ? (
+                    // Si hay sede, mostramos los servicios (Máximo 6)
+                    (Array.isArray(sede.servicios_cancha)
+                      ? sede.servicios_cancha
+                      : sede.servicios_cancha?.split(',') || []
+                    )
+                      .slice(0, 6)
+                      .map((s: string, i: number) => (
+                        <p key={i} className="text-gray-400 text-[10px] font-bold uppercase italic flex items-center gap-2">
+                          <span className="text-[#facf00] text-xs">✔</span> {s.trim()}
+                        </p>
+                      ))
+                  ) : (
+                    // Si NO hay sede, mostramos información de Visitante
+                    <div className="col-span-2 py-2">
+                      <p className="text-[#facf00] text-[10px] font-black uppercase italic mb-1">
+                        EQUIPO VISITANTE
                       </p>
-                    ))
-                ) : (
-                  // Fallback
-                  ["PARQUEO", "DUCHAS", "PETOS", "ILUMINACIÓN"].map((s, i) => (
-                    <p key={i} className="text-gray-600 text-[10px] font-bold uppercase italic flex items-center gap-2">
-                      <span className="text-gray-800">✔</span> {s}
-                    </p>
-                  ))
-                )}
+                      <p className="text-gray-500 text-[9px] font-bold uppercase italic leading-relaxed">
+                        Este equipo no cuenta con sede fija actualmente. Disponibles para pactar retos en canchas neutrales o sedes rivales.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="mt-6 pt-4 border-t border-white/5">
                 <p className="text-[8px] text-gray-600 font-black uppercase italic">
-                  * Servicios sujetos a disponibilidad de la sede.
+                  {sede
+                    ? "* Servicios sujetos a disponibilidad de la sede."
+                    : "* Contacta al capitán para coordinar la sede del encuentro."
+                  }
                 </p>
               </div>
             </div>
+
 
           </div>
 

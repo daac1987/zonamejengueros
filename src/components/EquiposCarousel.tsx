@@ -152,14 +152,14 @@ export default function TeamSearch() {
                                         {equipo.provincia} • {equipo.modalidad}
                                     </div>
                                     <h3 className="text-5xl font-black italic text-white uppercase tracking-tighter mb-4 leading-none">
-                                        {equipo.nombre_equipo}
+                                        {equipo.nombre}
                                     </h3>
 
                                     <div className="space-y-3 mb-8">
                                         <div className="flex items-center gap-3 text-gray-400">
                                             <span className="text-[#facf00]">🏟️</span>
                                             <span className="font-bold uppercase text-xs tracking-widest">
-                                                Sede: {equipo.sede.nombre || "Sin cancha fija"}
+                                                Sede: {equipo.sede?.nombre || "Sin cancha SEDE"}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3 text-gray-400">

@@ -54,7 +54,7 @@ export default function DetalleTorneo() {
   const sedePrincipal = torneo.sede?.[0]?.cancha;
 
   return (
-    <div className="min-h-screen pt-28 pb-20 px-4 max-w-5xl mx-auto">
+    <div className="min-h-screen pt-20 pb-20 px-4 max-w-5xl mx-auto">
 
       {/* HEADER DEL TORNEO */}
       <div className="bg-[#111] border border-white/10 p-8 rounded-3xl mb-8 relative overflow-hidden">

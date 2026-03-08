@@ -30,7 +30,8 @@ export default function DashboardCancha() {
         servicios_cancha: '',
         sede_url: '',
         foto_cancha_uno_url: '',
-        foto_cancha_dos_url: ''
+        foto_cancha_dos_url: '',
+        link_maps: '',
     });
 
     const [noticias, setNoticias] = useState<any[]>([]);
@@ -234,6 +235,10 @@ export default function DashboardCancha() {
                         <div className="space-y-1">
                             <label className="text-[9px] font-black text-zinc-500 uppercase ml-2 tracking-widest text-[#facf00]">Servicios y Extras</label>
                             <textarea value={cancha.servicios_cancha} onChange={e => setCancha({ ...cancha, servicios_cancha: e.target.value })} className="w-full bg-black p-4 rounded-xl border border-white/5 h-20 outline-none focus:border-[#facf00] text-sm" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black text-zinc-500 uppercase ml-2 tracking-widest text-[#facf00]">Link Dirección Google Maps</label>
+                            <textarea value={cancha.link_maps} onChange={e => setCancha({ ...cancha, link_maps: e.target.value })} className="w-full bg-black p-4 rounded-xl border border-white/5 h-20 outline-none focus:border-[#facf00] text-sm" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">

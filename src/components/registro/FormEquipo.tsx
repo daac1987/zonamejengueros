@@ -135,7 +135,7 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-gray-500 uppercase ml-2">PROVINCIA</label>
                                 <label className="text-[10px] font-black text-gray-500 uppercase ml-2">PROVINCIA</label>
-                                <select className="w-full bg-[#111] border border-white/5 p-4 rounded-2xl text-white font-bold outline-none focus:border-[#facf00]"
+                                <select className="w-full bg-[#111] border border-white/5 p-4 rounded-2xl text-white font-bold outline-none focus:border-[#facf00]" required
                                     onChange={e => setFormData({ ...formData, provincia_equipo: e.target.value })}>
                                     <option value="">Seleccione provincia</option>
                                     <option>San José</option><option>Alajuela</option><option>Cartago</option><option>Heredia</option><option>Guanacaste</option><option>Puntarenas</option><option>Limón</option>
@@ -212,11 +212,11 @@ export default function FormEquipo({ onBack }: { onBack: () => void }) {
                                     <label className="text-[10px] font-black text-gray-500 uppercase ml-2">{img.label}</label>
                                     <div className="relative group bg-[#111] border-2 border-dashed border-white/10 rounded-2xl h-40 flex flex-col items-center justify-center overflow-hidden hover:border-[#facf00] transition-all">
                                         {formData[img.field as keyof typeof formData] ? (
-                                            <img src={formData[img.field as keyof typeof formData]} className="w-full h-full object-cover" />
+                                            <img src={formData[img.field as keyof typeof formData]} className="w-full h-full object-cover"/>
                                         ) : (
                                             <label className="cursor-pointer flex flex-col items-center">
                                                 <Plus className="text-gray-500 group-hover:text-[#facf00]" />
-                                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, img.field)} />
+                                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, img.field)} required />
                                             </label>
                                         )}
                                     </div>

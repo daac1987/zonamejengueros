@@ -25,7 +25,7 @@ const SECCIONES = [
 
 export default function TerminosPage() {
   return (
-    <div className="min-h-screen pt-28 pb-20 px-4 max-w-4xl mx-auto">
+    <div className="min-h-screen pt-20 pb-20 px-4 max-w-4xl mx-auto">
       {/* Encabezado */}
       <div className="mb-12 border-b border-[#facf00]/20 pb-8">
         <h1 className="text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-white">

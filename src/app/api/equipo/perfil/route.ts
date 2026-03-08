@@ -25,7 +25,11 @@ export async function GET(req: Request) {
                     include: {
                         categoria_equipo: true,
                         cantidad_jugadores: true,
-                        sede_equipo: true,
+                        sede_equipo: {
+                            include: {
+                                cancha: true
+                            }   
+                        },
                         usuario_equipo: {
                             include: {
                                 usuario: true

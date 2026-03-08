@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Camera, MapPin, Clock, User, Tag, Shield, Plus, Image as ImageIcon, Cat } from 'lucide-react';
+import { link } from 'fs';
 
 export default function FormCancha({ onBack }: { onBack: () => void }) {
     const [cantidadJugadores, setCantidadJugadores] = useState<{ cantidad_jugadores_id: number, cantidad_jugadores: string }[]>([]);
@@ -22,7 +23,8 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
         servicios_cancha: '',
         sede_url: '',
         foto_sede_uno_url: '',
-        foto_sede_dos_url: ''
+        foto_sede_dos_url: '',
+        link_maps: '',
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -196,6 +198,11 @@ export default function FormCancha({ onBack }: { onBack: () => void }) {
                                 <label className="text-[10px] font-black text-gray-500 uppercase ml-2">SERVICIOS INCLUIDOS</label>
                                 <input required type="text" className="w-full bg-[#111] border border-white/5 p-4 rounded-2xl text-white font-bold outline-none focus:border-[#facf00]" placeholder="Parqueo, Duchas, Soda, Petos, Balón..."
                                     onChange={e => setFormData({ ...formData, servicios_cancha: e.target.value })} />
+                            </div>
+                            <div className="md:col-span-3 space-y-1">
+                                <label className="text-[10px] font-black text-gray-500 uppercase ml-2">Link Dirección Google Maps</label>
+                                <input required type="text" className="w-full bg-[#111] border border-white/5 p-4 rounded-2xl text-white font-bold outline-none focus:border-[#facf00]" placeholder="https://maps.google.com/..."
+                                    onChange={e => setFormData({ ...formData, link_maps: e.target.value })} />
                             </div>
                         </div>
                     </div>

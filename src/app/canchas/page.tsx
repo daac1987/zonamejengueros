@@ -67,7 +67,7 @@ export default function CanchasPage() {
     }, [filtroZona, filtroTipo, canchasDB]);
 
     return (
-        <div className="min-h-screen pt-5 pb-20 px-4 max-w-7xl mx-auto">
+        <div className="min-h-screen pt-20 pb-20 px-4 max-w-7xl mx-auto">
 
             {/* HEADER */}
             <div className="mb-12">

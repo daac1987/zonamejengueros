@@ -73,14 +73,14 @@ export async function GET() {
         const equiposFormateados = relaciones.map((rel) => {
             const e = rel.equipo;
 
-            // Obtenemos la primera sede si existe
-            const sedePrincipal = e.sede_equipo[0]?.cancha;
+            // 1. Verificamos que sede_equipo exista y tenga al menos un elemento
+            // 2. Usamos el encadenamiento opcional ?. para acceder a la cancha de forma segura
+            const sedeRelacion = e.sede_equipo && e.sede_equipo.length > 0 ? e.sede_equipo[0] : null;
+            const canchaData = sedeRelacion?.cancha;
 
             return {
                 id: e.equipo_id,
-                // --- AQUÍ ESTÁ EL DATO QUE NECESITAS ---
-                usuario_id: rel.usuario_id, 
-                // ---------------------------------------
+                usuario_id: rel.usuario_id,
                 nombre: e.nombre_equipo,
                 telefono: e.telefono_equipo,
                 provincia: e.provincia_equipo,
@@ -94,9 +94,10 @@ export async function GET() {
                 categoria_nombre: e.categoria_equipo?.categoria_equipo || "Sin categoría",
                 modalidad: e.cantidad_jugadores?.cantidad_jugadores || "No definida",
 
-                sede: sedePrincipal ? {
-                    id: sedePrincipal.cancha_id,
-                    nombre: sedePrincipal.nombre_cancha,
+                // Si canchaData existe, extraemos sus datos; de lo contrario, devolvemos null
+                sede: canchaData ? {
+                    id: canchaData.cancha_id,
+                    nombre: canchaData.nombre_cancha,
                 } : null
             };
         });

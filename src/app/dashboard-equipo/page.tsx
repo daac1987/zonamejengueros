@@ -15,10 +15,13 @@ export default function DashboardEquipo() {
     const [mounted, setMounted] = useState(false);
     const [usuario_id, setUsuarioId] = useState<string | null>(null);
     const [categoriasNoticias, setCategoriasNoticias] = useState<any[]>([]);
-    
+    const [canchasDB, setCanchasDB] = useState<any[]>([]);
+
     // Auxiliares para selects
     const [catEquipos, setCatEquipos] = useState<any[]>([]);
     const [modalidades, setModalidades] = useState<any[]>([]);
+    const [tieneSede, setTieneSede] = useState(false);
+    const [canchaSeleccionada, setCanchaSeleccionada] = useState('');
 
     const [equipo, setEquipo] = useState({
         equipo_id: '',
@@ -32,7 +35,15 @@ export default function DashboardEquipo() {
         cantidad_jugadores_id: '',
         logo_url: '',
         foto_equipo_uno_url: '',
-        foto_equipo_dos_url: ''
+        foto_equipo_dos_url: '',
+        sede_equipo: [{
+            cancha_id: '',
+            cancha: {
+                nombre_cancha: '',
+                ubicacion_cancha: '',
+                provincia_cancha: ''
+            }
+        }]
     });
 
     const [noticias, setNoticias] = useState<any[]>([]);
@@ -47,25 +58,29 @@ export default function DashboardEquipo() {
     }, []);
 
     const cargarAuxiliares = async () => {
-        const [resCat, resMod, resNot] = await Promise.all([
+        // Agregué resCan para las canchas
+        const [resCat, resMod, resNot, resCan] = await Promise.all([
             fetch('/api/categoria_equipo'),
             fetch('/api/cantidad_jugadores'),
-            fetch('/api/categoria_noticias')
+            fetch('/api/categoria_noticias'),
+            fetch('/api/canchas'), // Esta es la ruta de canchas
         ]);
+
         if (resCat.ok) setCatEquipos(await resCat.json());
         if (resMod.ok) setModalidades(await resMod.json());
         if (resNot.ok) setCategoriasNoticias(await resNot.json());
+        if (resCan.ok) setCanchasDB(await resCan.json());
     };
 
     const cargarDatos = async (id: string) => {
         try {
-            // Se asume una ruta que busque el equipo asociado al usuario
             const res = await fetch(`/api/equipo/perfil?id=${id}`);
             const data = await res.json();
 
             if (res.ok && data) {
                 setEquipo({
                     ...data,
+                    // Mapeamos los campos básicos
                     nombre_equipo: data.nombre_equipo || '',
                     telefono_equipo: data.telefono_equipo || '',
                     provincia_equipo: data.provincia_equipo || '',
@@ -76,10 +91,19 @@ export default function DashboardEquipo() {
                     cantidad_jugadores_id: data.cantidad_jugadores_id || '',
                     logo_url: data.logo_url || '',
                     foto_equipo_uno_url: data.foto_equipo_uno_url || '',
-                    foto_equipo_dos_url: data.foto_equipo_dos_url || ''
-                });
-            }
+                    foto_equipo_dos_url: data.foto_equipo_dos_url || '',
 
+                    // IMPORTANTE: Manejo de la sede
+                    // Si data.sede_equipo existe y tiene algo, lo usamos. 
+                    // Si no, usamos la estructura vacía que definiste.
+                    sede_equipo: (data.sede_equipo && data.sede_equipo.length > 0)
+                        ? data.sede_equipo
+                        : [{
+                            cancha_id: '',
+                            cancha: { nombre_cancha: '', ubicacion_cancha: '', provincia_cancha: '' }
+                        }]
+                });
+            } // Debug para verificar la estructura de datos
             const resN = await fetch(`/api/noticias?usuario_id=${id}`);
             if (resN.ok) {
                 const dataN = await resN.json();
@@ -207,9 +231,9 @@ export default function DashboardEquipo() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black text-zinc-500 uppercase ml-2 tracking-widest text-[#facf00]">Categoría</label>
-                                <select 
-                                    value={equipo.categoria_equipo_id} 
-                                    onChange={e => setEquipo({...equipo, categoria_equipo_id: e.target.value})}
+                                <select
+                                    value={equipo.categoria_equipo_id}
+                                    onChange={e => setEquipo({ ...equipo, categoria_equipo_id: e.target.value })}
                                     className="w-full bg-black p-4 rounded-xl border border-white/5 outline-none focus:border-[#facf00] font-bold text-xs"
                                 >
                                     <option value="">Seleccionar...</option>
@@ -218,9 +242,9 @@ export default function DashboardEquipo() {
                             </div>
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black text-zinc-500 uppercase ml-2 tracking-widest text-[#facf00]">Modalidad</label>
-                                <select 
-                                    value={equipo.cantidad_jugadores_id} 
-                                    onChange={e => setEquipo({...equipo, cantidad_jugadores_id: e.target.value})}
+                                <select
+                                    value={equipo.cantidad_jugadores_id}
+                                    onChange={e => setEquipo({ ...equipo, cantidad_jugadores_id: e.target.value })}
                                     className="w-full bg-black p-4 rounded-xl border border-white/5 outline-none focus:border-[#facf00] font-bold text-xs"
                                 >
                                     <option value="">Seleccionar...</option>
@@ -234,13 +258,89 @@ export default function DashboardEquipo() {
                             <textarea value={equipo.logros_equipo} onChange={e => setEquipo({ ...equipo, logros_equipo: e.target.value })} className="w-full bg-black p-4 rounded-xl border border-white/5 h-20 outline-none focus:border-[#facf00] text-sm" placeholder="Ej: Campeón Torneo Apertura 2023..." />
                         </div>
 
+                        {/* SECCIÓN DE SEDE */}
+                        <div className="space-y-4 pt-4 border-t border-white/5">
+                            <div className="px-2">
+                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Sede Actual:</span>
+                                <p className="text-sm font-bold text-white italic">
+                                    {/* Acceso seguro a la relación de la sede */}
+                                    {equipo.sede_equipo?.[0]?.cancha?.nombre_cancha || 'NO ASIGNADA'}
+                                </p>
+                                {equipo.sede_equipo?.[0]?.cancha && (
+                                    <p className="text-[10px] text-zinc-400">
+                                        {equipo.sede_equipo[0].cancha.ubicacion_cancha}, {equipo.sede_equipo[0].cancha.provincia_cancha}
+                                    </p>
+                                )}
+                            </div>
+                            {/* Switch para mostrar el selector */}
+                            <div className="flex items-center justify-between bg-black/40 p-3 rounded-2xl border border-white/5">
+                                <span className="text-[9px] font-black uppercase italic">¿Cambiar Sede?</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setTieneSede(true)}
+                                        className={`px-4 py-1.5 rounded-lg font-black text-[9px] transition-colors ${tieneSede ? 'bg-[#facf00] text-black' : 'bg-zinc-800 text-zinc-500'}`}
+                                    >
+                                        SÍ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setTieneSede(false);
+                                            setCanchaSeleccionada('');
+                                        }}
+                                        className={`px-4 py-1.5 rounded-lg font-black text-[9px] transition-colors ${!tieneSede ? 'bg-[#facf00] text-black' : 'bg-zinc-800 text-zinc-500'}`}
+                                    >
+                                        NO
+                                    </button>
+                                </div>
+                            </div>
+
+                            {tieneSede && (
+                                <div className="space-y-3 bg-black/60 p-4 rounded-2xl border border-[#facf00]/20">
+                                    <select
+                                        value={canchaSeleccionada}
+                                        onChange={(e) => {
+                                            const idSeleccionado = e.target.value;
+                                            setCanchaSeleccionada(idSeleccionado);
+
+                                            const canchaEncontrada = canchasDB.find(c => c.id.toString() === idSeleccionado);
+                                            if (canchaEncontrada) {
+                                                setEquipo(prev => ({
+                                                    ...prev,
+                                                    // Actualizamos la relación localmente para el feedback visual
+                                                    sede_equipo: [{
+                                                        cancha_id: canchaEncontrada.id,
+                                                        cancha: {
+                                                            nombre_cancha: canchaEncontrada.nombre_cancha,
+                                                            ubicacion_cancha: canchaEncontrada.ubicacion_cancha,
+                                                            provincia_cancha: canchaEncontrada.provincia_cancha
+                                                        }
+                                                    }]
+                                                }));
+                                            }
+                                        }}
+                                        className="w-full bg-black border border-white/10 p-3 rounded-xl text-xs font-bold outline-none focus:border-[#facf00]"
+                                    >
+                                        <option value="">-- Seleccionar Cancha Registrada --</option>
+                                        {canchasDB.map(c => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.nombre} ({c.zona})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+
+
                         <div className="grid grid-cols-2 gap-4">
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
-                                {equipo.foto_equipo_uno_url ? <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 1" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14}/> Foto 1</div>}
+                                {equipo.foto_equipo_uno_url ? <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 1" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14} /> Foto 1</div>}
                                 <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_equipo_uno_url')} />
                             </label>
                             <label className="bg-black border border-dashed border-white/10 p-2 rounded-2xl cursor-pointer hover:border-[#facf00] block aspect-video relative overflow-hidden group/img">
-                                {equipo.foto_equipo_dos_url ? <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 2" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14}/> Foto 2</div>}
+                                {equipo.foto_equipo_dos_url ? <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover rounded-lg" alt="Equipo 2" /> : <div className="h-full flex items-center justify-center text-[10px] text-zinc-700 font-bold uppercase italic"><Camera className="mr-2" size={14} /> Foto 2</div>}
                                 <input type="file" className="hidden" accept="image/*" onChange={e => handleFileUpload(e, 'foto_equipo_dos_url')} />
                             </label>
                         </div>

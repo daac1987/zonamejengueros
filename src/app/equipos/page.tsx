@@ -65,7 +65,7 @@ export default function EquiposPage() {
     }, [filtroProvincia, filtroCategoria, equiposDB]);
 
     return (
-        <div className="min-h-screen pt-5 pb-20 px-4 max-w-7xl mx-auto">
+        <div className="min-h-screen pt-20 pb-20 px-4 max-w-7xl mx-auto">
             {/* HEADER */}
             <div className="mb-12">
                 <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none text-white">

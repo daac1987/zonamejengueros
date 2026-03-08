@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { link } from 'fs';
 
 export async function GET(req: Request) {
     try {
@@ -45,7 +46,8 @@ export async function GET(req: Request) {
             foto_sede_uno_url: canchaData.foto_sede_uno_url,
             foto_sede_dos_url: canchaData.foto_sede_dos_url,
             // Pasamos el ID de la cancha por si lo necesitas
-            cancha_id: canchaData.cancha_id
+            cancha_id: canchaData.cancha_id,
+            link_maps: canchaData.link_maps
         };
 
         return NextResponse.json(respuestaDashboard);

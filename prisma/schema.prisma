@@ -36,6 +36,7 @@ model cancha {
   cantidad_jugadores_id Int?
   precio_cancha         Int
   servicios_cancha      String?
+  link_maps             String?
   sede_url              String?
   foto_sede_uno_url     String?
   foto_sede_dos_url     String?
