@@ -10,6 +10,7 @@ interface FormularioNoticiaProps {
 
 export default function FormularioNoticia({ usuarioId, onNoticiaCreada }: FormularioNoticiaProps) {
     const [categoriaNoticias, setCategoriaNoticias] = useState<{ categoria_noticia_id: number, categoria_noticia: string }[]>([]);
+    const [uploadingImg, setUploadingImg] = useState(false);
     const [nuevaNoticia, setNuevaNoticia] = useState({
         titulo_noticia: '',
         texto_noticia: '',
@@ -33,27 +34,42 @@ export default function FormularioNoticia({ usuarioId, onNoticiaCreada }: Formul
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const tId = toast.loading('Subiendo imagen...');
-        const reader = new FileReader();
+        // Validación: Máximo 4MB
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("La imagen es demasiado pesada (Máximo 4MB)");
+            return;
+        }
 
-        reader.onloadend = async () => {
-            const base64 = reader.result as string;
-            try {
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ file: base64, fileName: file.name }),
-                });
-                const data = await res.json();
-                if (res.ok && data.url) {
-                    setNuevaNoticia(prev => ({ ...prev, foto_noticia_url: data.url }));
-                    toast.success('Imagen lista', { id: tId });
-                }
-            } catch (error) {
-                toast.error('Error al subir archivo', { id: tId });
+        setUploadingImg(true);
+        const tId = toast.loading('Subiendo imagen de la noticia...');
+
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            const base64 = await new Promise<string>((resolve) => {
+                reader.onload = () => resolve(reader.result as string);
+            });
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ file: base64, fileName: file.name }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.url) {
+                setNuevaNoticia(prev => ({ ...prev, foto_noticia_url: data.url }));
+                toast.success('¡Imagen cargada!', { id: tId });
+            } else {
+                throw new Error("Error en el servidor");
             }
-        };
-        reader.readAsDataURL(file);
+        } catch (error) {
+            toast.error('No se pudo subir la imagen', { id: tId });
+        } finally {
+            setUploadingImg(false);
+        }
     };
 
     const handleCreateNews = async (e: React.FormEvent) => {
@@ -117,15 +133,26 @@ export default function FormularioNoticia({ usuarioId, onNoticiaCreada }: Formul
                     className="w-full bg-black p-4 rounded-xl border border-white/5 h-24 outline-none focus:border-[#facf00] text-sm"
                 />
                 <div className="flex items-center gap-4">
-                    <label className="flex-1 flex items-center justify-center gap-2 bg-zinc-900 p-4 rounded-xl border border-white/5 cursor-pointer hover:border-[#facf00] transition-all">
-                        <ImageIcon size={18} className="text-[#facf00]" />
-                        <span className="text-[10px] font-black uppercase">
-                            {nuevaNoticia.foto_noticia_url ? 'Imagen Lista' : 'Adjuntar Imagen'}
+                    <label className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border transition-all cursor-pointer 
+                    ${uploadingImg ? 'bg-zinc-800 border-[#facf00] animate-pulse' : 'bg-zinc-900 border-white/5 hover:border-[#facf00]'}`}>
+
+                        {uploadingImg ? (
+                            <div className="w-4 h-4 border-2 border-[#facf00] border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <ImageIcon size={18} className={nuevaNoticia.foto_noticia_url ? "text-green-500" : "text-[#facf00]"} />
+                        )}
+
+                        <span className="text-[10px] font-black uppercase tracking-wider">
+                            {uploadingImg ? 'Subiendo...' : nuevaNoticia.foto_noticia_url ? 'Imagen Lista ✅' : 'Adjuntar Imagen'}
                         </span>
-                        <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploadingImg} />
                     </label>
-                    <button type="submit" className="bg-white text-black px-10 py-4 rounded-xl font-black uppercase italic text-xs hover:bg-[#facf00] transition-all">
-                        Publicar
+
+                    <button
+                        type="submit"
+                        disabled={uploadingImg}
+                        className="bg-white text-black px-10 py-4 rounded-xl font-black uppercase italic text-xs hover:bg-[#facf00] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        {uploadingImg ? 'Espere...' : 'Publicar'}
                     </button>
                 </div>
             </form>
