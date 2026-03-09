@@ -6,6 +6,7 @@ import Footer from "@/src/components/Footer";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { BannerBienvenida } from "@/src/components/BannerBienvenida";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="bg-[#0a0a0a]">
         <div className="fixed inset-0 bg-glow pointer-events-none" />
         <Navbar />
+        <BannerBienvenida />
         {children}
         <Analytics />
         <SpeedInsights />
