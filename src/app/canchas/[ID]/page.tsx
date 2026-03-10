@@ -80,10 +80,10 @@ export default function DetalleCancha() {
         {/* Laterales */}
         <div className="hidden md:grid grid-rows-2 gap-4 h-[400px]">
           <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            {cancha.foto_sede_dos_url && <img src={cancha.foto_sede_dos_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
+            {cancha.foto_sede_dos_url && <img src={cancha.foto_sede_dos_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00] p-1" />}
           </div>
           <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            {cancha.foto_sede_uno_url && <img src={cancha.foto_sede_uno_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
+            {cancha.foto_sede_uno_url && <img src={cancha.foto_sede_uno_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00] p-1" />}
           </div>
         </div>
       </div>

@@ -143,7 +143,7 @@ export default function CanchasPage() {
                                 {cancha.foto_cancha_url ? (
                                     <img
                                         src={cancha.foto_cancha_url}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 p-1"
                                         alt={cancha.nombre}
                                     />
                                 ) : (

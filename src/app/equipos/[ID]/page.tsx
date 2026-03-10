@@ -61,7 +61,7 @@ export default function TeamProfile({ params }: { params: Promise<{ ID: string }
         <div className="md:col-span-2 h-[400px] bg-[#111] rounded-3xl border border-white/5 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
           {equipo.foto_equipo_uno_url ? (
-            <img src={equipo.foto_equipo_uno_url} className="absolute inset-0 w-full h-full object-cover opacity-60 border-4 border-[#facf00]" />
+            <img src={equipo.foto_equipo_uno_url} className="absolute inset-0 w-full h-full object-cover opacity-60 border-4 border-[#facf00] p-1" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-zinc-800 font-black italic text-4xl uppercase">Equipo</div>
           )}
@@ -79,10 +79,10 @@ export default function TeamProfile({ params }: { params: Promise<{ ID: string }
         {/* Laterales */}
         <div className="hidden md:grid grid-rows-2 gap-4 h-[400px]">
           <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            {equipo.foto_equipo_dos_url && <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
+            {equipo.foto_equipo_dos_url && <img src={equipo.foto_equipo_dos_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00] p-1" />}
           </div>
           <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            {equipo.foto_equipo_uno_url && <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00]" />}
+            {equipo.foto_equipo_uno_url && <img src={equipo.foto_equipo_uno_url} className="w-full h-full object-cover opacity-40 border-4 border-[#facf00] p-1" />}
           </div>
         </div>
       </div>

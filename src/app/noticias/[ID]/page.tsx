@@ -123,7 +123,7 @@ export default function EquipoNoticiasPage({ params }: { params: Promise<{ ID: s
                                     <img
                                         src={news.foto_noticia_url || news.imagen}
                                         alt={news.titulo_noticia}
-                                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500 p-1"
                                     />
                                     <div className="absolute top-6 left-6">
                                         <span className="bg-[#facf00] text-black text-[9px] font-black px-3 py-1 rounded-full uppercase italic">
